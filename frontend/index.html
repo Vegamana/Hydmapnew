@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F3EEE4">
+<title>Hyderabad Property Map — what rent actually costs, street by street</title>
+<meta name="description" content="Every flat on the map, with the real average rent within 3 km of wherever you are looking. No login, no phone numbers, no spam.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://maps.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./css/app.css">
+</head>
+<body>
+
+<!-- The map is the page. Everything else floats over it. -->
+<div id="map" role="application" aria-label="Map of property listings in Hyderabad"></div>
+
+<a class="skip-link" href="#search-input">Skip to search</a>
+
+<!-- ── Search ─────────────────────────────────────────────────────── -->
+<div class="search" id="search">
+  <div class="search__field">
+    <svg class="search__icon" viewBox="0 0 20 20" aria-hidden="true">
+      <circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M13 13l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+    <input id="search-input" type="search" autocomplete="off" spellcheck="false"
+           placeholder="Kondapur, Ameerpet metro, a road name…"
+           aria-label="Search for a place in Hyderabad"
+           aria-expanded="false" aria-controls="search-results" role="combobox">
+    <button class="search__clear" id="search-clear" type="button" aria-label="Clear search" hidden>&times;</button>
+  </div>
+  <ul class="search__results" id="search-results" role="listbox" hidden></ul>
+</div>
+
+<!-- ── List a flat ────────────────────────────────────────────────── -->
+<button class="list-btn" id="list-open" type="button">List my flat</button>
+
+<!-- ── Layer rail ─────────────────────────────────────────────────── -->
+<nav class="rail" id="rail" aria-label="Map layers">
+  <button class="rail__btn" data-layer="metro"     aria-pressed="false"><span class="rail__mark" data-mark="metro"></span>Metro</button>
+  <button class="rail__btn" data-layer="train"     aria-pressed="false"><span class="rail__mark" data-mark="train"></span>Trains</button>
+  <button class="rail__btn" data-layer="bus"       aria-pressed="false"><span class="rail__mark" data-mark="bus"></span>Buses</button>
+  <button class="rail__btn" data-layer="heatmap"   aria-pressed="false"><span class="rail__mark" data-mark="heat"></span>Density</button>
+  <button class="rail__btn" data-layer="aqi"       aria-pressed="false"><span class="rail__mark" data-mark="aqi"></span>Air</button>
+  <button class="rail__btn" data-layer="satellite" aria-pressed="false"><span class="rail__mark" data-mark="sat"></span>Satellite</button>
+</nav>
+
+<!-- ── Rent pulse: the signature readout ──────────────────────────── -->
+<!-- Average rent within 3 km of the map centre, recalculated on every pan.
+     This is the one number the whole product exists to show. -->
+<section class="pulse" id="pulse" aria-live="polite" aria-label="Average rent near the centre of the map">
+  <header class="pulse__head">
+    <span class="pulse__eyebrow">Average rent within</span>
+    <div class="pulse__radius" role="group" aria-label="Radius">
+      <button data-radius="1000" type="button">1<abbr title="kilometre">km</abbr></button>
+      <button data-radius="3000" type="button" class="is-on">3<abbr title="kilometre">km</abbr></button>
+      <button data-radius="5000" type="button">5<abbr title="kilometre">km</abbr></button>
+    </div>
+  </header>
+
+  <p class="pulse__value" id="pulse-value">—</p>
+
+  <div class="pulse__spread" id="pulse-spread" hidden>
+    <div class="pulse__track"><span class="pulse__median" id="pulse-median"></span></div>
+    <div class="pulse__ends">
+      <span id="pulse-min">—</span>
+      <span id="pulse-max">—</span>
+    </div>
+  </div>
+
+  <p class="pulse__note" id="pulse-note">Move the map to sample an area.</p>
+</section>
+
+<!-- ── Legend ─────────────────────────────────────────────────────── -->
+<div class="legend" id="legend">
+  <span><i class="dot dot--rent"></i>Rent</span>
+  <span><i class="dot dot--sharing"></i>Sharing</span>
+  <span><i class="dot dot--sale"></i>Sale</span>
+  <span><i class="dot dot--paid"></i>Rent paid</span>
+  <output class="legend__count" id="results-count"></output>
+</div>
+
+<!-- ── Nearby chips ───────────────────────────────────────────────── -->
+<div class="nearby" id="nearby" hidden>
+  <button class="nearby__chip" data-place="biryani"  type="button" aria-pressed="false">🍗 Biryani</button>
+  <button class="nearby__chip" data-place="gym"      type="button" aria-pressed="false">💪 Gyms</button>
+  <button class="nearby__chip" data-place="hospital" type="button" aria-pressed="false">🏥 Hospitals</button>
+</div>
+
+<!-- ── Listing sheet ──────────────────────────────────────────────── -->
+<aside class="sheet" id="sheet" aria-labelledby="sheet-title" hidden>
+  <button class="sheet__close" id="sheet-close" type="button" aria-label="Close listing">&times;</button>
+  <div class="sheet__scroll">
+    <span class="badge" id="sheet-badge">Rent</span>
+    <h2 class="sheet__title" id="sheet-title"></h2>
+    <p class="sheet__price" id="sheet-price"></p>
+    <dl class="facts" id="sheet-facts"></dl>
+    <p class="sheet__desc" id="sheet-desc"></p>
+
+    <button class="btn btn--primary" id="interest-open" type="button">I'm interested</button>
+    <p class="sheet__assure">The owner gets your details by email. Their number is never shown here.</p>
+
+    <section class="comments" aria-label="Comments">
+      <h3 class="comments__head">Questions about this place</h3>
+      <ul class="comments__list" id="comments-list"></ul>
+      <div class="comments__form">
+        <input id="comment-author" type="text" maxlength="40" placeholder="Your name (optional)" aria-label="Your name">
+        <textarea id="comment-text" rows="2" maxlength="1000" placeholder="Ask the neighbours something…" aria-label="Your question"></textarea>
+        <button class="btn btn--quiet" id="comment-send" type="button">Post question</button>
+      </div>
+    </section>
+  </div>
+</aside>
+
+<!-- ── Interest modal ─────────────────────────────────────────────── -->
+<div class="scrim" id="scrim" hidden></div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+  <button class="modal__close" id="modal-close" type="button" aria-label="Close">&times;</button>
+
+  <div class="modal__body" id="modal-body">
+    <p class="modal__eyebrow">Send your details</p>
+    <h2 class="modal__title" id="modal-title">The owner will email you back</h2>
+    <p class="modal__sub" id="modal-listing"></p>
+
+    <label class="field">
+      <span>Name</span>
+      <input id="f-name" type="text" autocomplete="name" maxlength="80" required>
+    </label>
+
+    <label class="field">
+      <span>Mobile</span>
+      <div class="field__phone">
+        <em>+91</em>
+        <input id="f-phone" type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="10" required>
+      </div>
+    </label>
+
+    <label class="field">
+      <span>Email</span>
+      <input id="f-email" type="email" autocomplete="email" maxlength="120" required>
+    </label>
+
+    <label class="field">
+      <span>Message <i>optional</i></span>
+      <textarea id="f-message" rows="2" maxlength="500" placeholder="When could I visit?"></textarea>
+    </label>
+
+    <label class="toggle" id="pay-toggle">
+      <input id="f-pay" type="checkbox">
+      <span class="toggle__track"><span class="toggle__knob"></span></span>
+      <span class="toggle__copy">
+        <strong>Add ₹1 to verify</strong>
+        <small>Owners answer verified enquiries first. Skip it and your enquiry still goes through.</small>
+      </span>
+    </label>
+
+    <p class="modal__error" id="modal-error" role="alert" hidden></p>
+
+    <button class="btn btn--primary btn--wide" id="f-submit" type="button">Send my details</button>
+    <p class="modal__fine">We share your name, number and email with this owner only.</p>
+  </div>
+
+  <div class="modal__done" id="modal-done" hidden>
+    <div class="modal__tick" aria-hidden="true">✓</div>
+    <h2>Sent</h2>
+    <p id="done-copy">The owner has your details and will get in touch by email or phone.</p>
+    <button class="btn btn--quiet" id="done-close" type="button">Back to the map</button>
+  </div>
+</div>
+
+<!-- ── List-a-flat modal ─────────────────────────────────────────────── -->
+<div class="scrim" id="list-scrim" hidden></div>
+
+<div class="modal" id="list-modal" role="dialog" aria-modal="true" aria-labelledby="list-modal-title" hidden>
+  <button class="modal__close" id="list-modal-close" type="button" aria-label="Close">&times;</button>
+
+  <div class="modal__body" id="list-modal-body">
+    <p class="modal__eyebrow">List your flat</p>
+    <h2 class="modal__title" id="list-modal-title">Nobody sees this until you confirm it by email</h2>
+    <p class="modal__sub">No login. We email you a one-click link — click it and the listing goes live.</p>
+
+    <button class="pin-picker" id="list-pin" type="button">
+      <span class="pin-picker__mark" aria-hidden="true">📍</span>
+      <span class="pin-picker__copy">
+        <strong id="list-pin-label">Tap to set the location</strong>
+        <small>Click your building on the map</small>
+      </span>
+    </button>
+
+    <label class="field">
+      <span>Title</span>
+      <input id="l-title" type="text" maxlength="140" placeholder="2BHK near Hitec City metro" required>
+    </label>
+
+    <label class="field">
+      <span>Listing type</span>
+      <select id="l-type" required>
+        <option value="rent">Rent</option>
+        <option value="sharing">Sharing / PG</option>
+        <option value="sale">Sale</option>
+      </select>
+    </label>
+
+    <label class="field">
+      <span>Price <i id="l-price-unit">(₹ / month)</i></span>
+      <input id="l-price" type="number" inputmode="numeric" min="1" placeholder="25000" required>
+    </label>
+
+    <div class="field-row">
+      <label class="field">
+        <span>Bedrooms <i>optional</i></span>
+        <select id="l-bhk">
+          <option value="">—</option>
+          <option value="1">1 BHK</option>
+          <option value="2">2 BHK</option>
+          <option value="3">3 BHK</option>
+          <option value="4">4 BHK</option>
+          <option value="5+">5+ BHK</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Furnishing <i>optional</i></span>
+        <select id="l-furnishing">
+          <option value="">—</option>
+          <option value="furnished">Furnished</option>
+          <option value="semi">Semi-furnished</option>
+          <option value="unfurnished">Unfurnished</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="field-row">
+      <label class="field">
+        <span>Deposit <i>optional</i></span>
+        <input id="l-deposit" type="number" inputmode="numeric" min="0" placeholder="50000">
+      </label>
+
+      <label class="field">
+        <span>Parking <i>optional</i></span>
+        <input id="l-parking" type="number" inputmode="numeric" min="0" max="10" placeholder="1">
+      </label>
+    </div>
+
+    <div class="field-row">
+      <label class="field">
+        <span>Area, sq ft <i>optional</i></span>
+        <input id="l-sqft" type="number" inputmode="numeric" min="0" placeholder="1100">
+      </label>
+
+      <label class="field">
+        <span>Preference <i>optional</i></span>
+        <select id="l-gender">
+          <option value="">Anyone</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="any">Any</option>
+        </select>
+      </label>
+    </div>
+
+    <label class="toggle" id="l-gated-toggle">
+      <input id="l-gated" type="checkbox">
+      <span class="toggle__track"><span class="toggle__knob"></span></span>
+      <span class="toggle__copy">
+        <strong>Gated community</strong>
+        <small>Turn on if the building has a gate or security desk.</small>
+      </span>
+    </label>
+
+    <label class="field">
+      <span>Description <i>optional</i></span>
+      <textarea id="l-desc" rows="3" maxlength="2000" placeholder="Walk to Cyber Towers. Covered parking, 24x7 water."></textarea>
+    </label>
+
+    <label class="field">
+      <span>Your email</span>
+      <input id="l-email" type="email" autocomplete="email" maxlength="120" required>
+    </label>
+
+    <label class="field">
+      <span>Your mobile <i>optional</i></span>
+      <div class="field__phone">
+        <em>+91</em>
+        <input id="l-phone" type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="10">
+      </div>
+    </label>
+
+    <p class="modal__error" id="list-modal-error" role="alert" hidden></p>
+
+    <button class="btn btn--primary btn--wide" id="l-submit" type="button">Send confirmation link</button>
+    <p class="modal__fine">Your listing stays private until you click the link we email you. Nobody can see your email or phone on the map — ever.</p>
+  </div>
+
+  <div class="modal__done" id="list-modal-done" hidden>
+    <div class="modal__tick" aria-hidden="true">✓</div>
+    <h2>Check your email</h2>
+    <p id="list-done-copy">One click on that link and your listing goes live on the map.</p>
+    <button class="btn btn--quiet" id="list-done-close" type="button">Back to the map</button>
+  </div>
+</div>
+
+<!-- ── Map-click chooser ──────────────────────────────────────────── -->
+<div class="scrim" id="chooser-scrim" hidden></div>
+<div class="modal chooser" id="chooser-modal" role="dialog" aria-modal="true" aria-labelledby="chooser-title" hidden>
+  <button class="modal__close" id="chooser-close" type="button" aria-label="Close">&times;</button>
+  <h2 class="modal__title" id="chooser-title">Add something here</h2>
+
+  <div class="chooser__list">
+    <button class="chooser__opt" data-action="rent_report" type="button">
+      <span class="chooser__icon" data-mark="rent" aria-hidden="true"></span>
+      <span class="chooser__copy">
+        <strong>What rent are you paying?</strong>
+        <small>Anonymous data point — takes 10 seconds, helps everyone</small>
+      </span>
+    </button>
+
+    <button class="chooser__opt" data-action="list_flat" type="button">
+      <span class="chooser__icon" data-mark="list" aria-hidden="true"></span>
+      <span class="chooser__copy">
+        <strong>List my flat</strong>
+        <small>Free, direct contact, no broker</small>
+      </span>
+    </button>
+
+    <button class="chooser__opt" data-action="seeker" type="button">
+      <span class="chooser__icon" data-mark="seek" aria-hidden="true"></span>
+      <span class="chooser__copy">
+        <strong>I'm looking for a flat</strong>
+        <small>Drop a pin — matches land in your inbox</small>
+      </span>
+    </button>
+
+    <button class="chooser__opt" data-action="board_sighting" type="button">
+      <span class="chooser__icon" data-mark="board" aria-hidden="true"></span>
+      <span class="chooser__copy">
+        <strong>Spotted a To-Let board?</strong>
+        <small>Share the phone number — it goes live on the map</small>
+      </span>
+    </button>
+  </div>
+</div>
+
+<!-- ── Quick-action modal: rent report / seeker / board sighting ────── -->
+<div class="scrim" id="qa-scrim" hidden></div>
+<div class="modal" id="qa-modal" role="dialog" aria-modal="true" aria-labelledby="qa-title" hidden>
+  <button class="modal__close" id="qa-close" type="button" aria-label="Close">&times;</button>
+
+  <div class="modal__body" id="qa-body">
+    <p class="modal__eyebrow" id="qa-eyebrow">Quick add</p>
+    <h2 class="modal__title" id="qa-title">—</h2>
+    <p class="modal__sub" id="qa-sub"></p>
+
+    <div class="qa-fields" data-for="rent_report" hidden>
+      <label class="field">
+        <span>Monthly rent</span>
+        <input id="qa-rr-price" type="number" inputmode="numeric" min="1" placeholder="25000">
+      </label>
+      <div class="field-row">
+        <label class="field">
+          <span>Type</span>
+          <select id="qa-rr-type">
+            <option value="rent">Rent</option>
+            <option value="sharing">Sharing / PG</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Bedrooms <i>optional</i></span>
+          <select id="qa-rr-bhk">
+            <option value="">—</option>
+            <option value="1">1 BHK</option>
+            <option value="2">2 BHK</option>
+            <option value="3">3 BHK</option>
+            <option value="4">4 BHK</option>
+            <option value="5+">5+ BHK</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <div class="qa-fields" data-for="seeker" hidden>
+      <div class="field-row">
+        <label class="field">
+          <span>Looking for</span>
+          <select id="qa-sk-type">
+            <option value="rent">Rent</option>
+            <option value="sharing">Sharing / PG</option>
+            <option value="sale">Sale</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Bedrooms <i>optional</i></span>
+          <select id="qa-sk-bhk">
+            <option value="">Any</option>
+            <option value="1">1 BHK</option>
+            <option value="2">2 BHK</option>
+            <option value="3">3 BHK</option>
+            <option value="4">4 BHK</option>
+            <option value="5+">5+ BHK</option>
+          </select>
+        </label>
+      </div>
+      <div class="field-row">
+        <label class="field">
+          <span>Min budget <i>optional</i></span>
+          <input id="qa-sk-min" type="number" inputmode="numeric" min="0" placeholder="15000">
+        </label>
+        <label class="field">
+          <span>Max budget <i>optional</i></span>
+          <input id="qa-sk-max" type="number" inputmode="numeric" min="0" placeholder="30000">
+        </label>
+      </div>
+      <label class="field">
+        <span>Email</span>
+        <input id="qa-sk-email" type="email" autocomplete="email" placeholder="you@example.com">
+      </label>
+    </div>
+
+    <div class="qa-fields" data-for="board_sighting" hidden>
+      <label class="field">
+        <span>Phone number on the board</span>
+        <div class="field__phone">
+          <em>+91</em>
+          <input id="qa-bs-phone" type="tel" inputmode="numeric" maxlength="10">
+        </div>
+      </label>
+      <label class="field">
+        <span>Note <i>optional</i></span>
+        <textarea id="qa-bs-note" rows="2" maxlength="300" placeholder="2BHK, ground floor…"></textarea>
+      </label>
+    </div>
+
+    <p class="modal__error" id="qa-error" role="alert" hidden></p>
+    <button class="btn btn--primary btn--wide" id="qa-submit" type="button">Send</button>
+  </div>
+
+  <div class="modal__done" id="qa-done" hidden>
+    <div class="modal__tick" aria-hidden="true">✓</div>
+    <h2 id="qa-done-title">Done</h2>
+    <p id="qa-done-copy"></p>
+    <button class="btn btn--quiet" id="qa-done-close" type="button">Back to the map</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<noscript>
+  <div class="noscript">This map needs JavaScript to draw listings. Turn it on and reload.</div>
+</noscript>
+
+<script type="module" src="./js/app.js"></script>
+</body>
+</html>

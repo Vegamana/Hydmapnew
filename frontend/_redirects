@@ -1,0 +1,4 @@
+# Single page: anything that is not a real asset falls through to index.html,
+# so /?listing=<uuid> deep links from emails always resolve.
+/listing/:id   /index.html?listing=:id   200
+/*             /index.html               200

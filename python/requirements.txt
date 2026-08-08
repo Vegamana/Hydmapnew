@@ -1,0 +1,5 @@
+# Runtime for every job in python/jobs/. Pinned; upgrade deliberately.
+psycopg[binary]==3.2.3      # direct Postgres access (pooler connection string)
+httpx==0.27.2               # Resend + Google Places calls
+python-dotenv==1.0.1        # local .env loading
+tenacity==9.0.0             # retry with backoff around flaky network calls

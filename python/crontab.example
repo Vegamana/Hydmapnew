@@ -1,0 +1,28 @@
+# Hyderabad Property Map — automation schedule (server timezone UTC).
+# Install with:  crontab python/crontab.example
+#
+# All times are chosen against IST (UTC+5:30):
+#   replies are processed all day, heavy jobs run while nobody is browsing.
+
+PATH=/usr/local/bin:/usr/bin:/bin
+APP=/srv/hyd-map/python
+PY=/srv/hyd-map/.venv/bin/python
+LOG=/var/log/hyd-map
+
+# Owner replies -> listing status. Every 15 minutes.
+*/15 * * * *  cd $APP && $PY -m jobs.email_processor              >> $LOG/email_processor.log 2>&1
+
+# Retry sweep only, on the half hour, in case IMAP is down but Resend is not.
+5,35 * * * *  cd $APP && $PY -m jobs.email_processor --retries-only >> $LOG/email_processor.log 2>&1
+
+# Aging reminders. 09:30 IST = 04:00 UTC — lands in the inbox with morning mail.
+0 4 * * *     cd $APP && $PY -m jobs.aging_posts                  >> $LOG/aging_posts.log 2>&1
+
+# Places cache warm-up. 04:00 IST = 22:30 UTC, off-peak, budget capped.
+30 22 * * *   cd $APP && $PY -m jobs.cache_warmer --budget 400    >> $LOG/cache_warmer.log 2>&1
+
+# Nightly rollup + health line in the log. 02:00 IST = 20:30 UTC.
+30 20 * * *   cd $APP && $PY -m jobs.analytics --report           >> $LOG/analytics.log 2>&1
+
+# Weekly housekeeping (Sunday 21:00 UTC).
+0 21 * * 0    cd $APP && $PY -m jobs.cleanup                      >> $LOG/cleanup.log 2>&1

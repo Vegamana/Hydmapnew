@@ -1,0 +1,85 @@
+{
+  "generated_from": "Sample subset. Regenerate the full dataset with python/tools/build_transit_data.py (OpenStreetMap, ODbL).",
+  "metro_lines": [
+    {
+      "name": "Red Line (Miyapur - LB Nagar)",
+      "color": "#C4453B",
+      "path": [
+        {"lat": 17.4966, "lng": 78.3580}, {"lat": 17.4894, "lng": 78.3860},
+        {"lat": 17.4849, "lng": 78.3993}, {"lat": 17.4736, "lng": 78.4058},
+        {"lat": 17.4552, "lng": 78.4180}, {"lat": 17.4374, "lng": 78.4487},
+        {"lat": 17.4256, "lng": 78.4560}, {"lat": 17.4009, "lng": 78.4720},
+        {"lat": 17.3812, "lng": 78.4922}, {"lat": 17.3510, "lng": 78.5520}
+      ]
+    },
+    {
+      "name": "Blue Line (Nagole - Raidurg)",
+      "color": "#2F6DB5",
+      "path": [
+        {"lat": 17.3806, "lng": 78.5588}, {"lat": 17.3982, "lng": 78.5590},
+        {"lat": 17.4058, "lng": 78.5290}, {"lat": 17.4270, "lng": 78.4980},
+        {"lat": 17.4374, "lng": 78.4487}, {"lat": 17.4425, "lng": 78.4290},
+        {"lat": 17.4460, "lng": 78.4090}, {"lat": 17.4483, "lng": 78.3915},
+        {"lat": 17.4425, "lng": 78.3760}
+      ]
+    },
+    {
+      "name": "Green Line (JBS - MG Bus Station)",
+      "color": "#2F8B57",
+      "path": [
+        {"lat": 17.4520, "lng": 78.4980}, {"lat": 17.4399, "lng": 78.4983},
+        {"lat": 17.4270, "lng": 78.4880}, {"lat": 17.4009, "lng": 78.4770},
+        {"lat": 17.3810, "lng": 78.4790}
+      ]
+    }
+  ],
+  "metro_stations": [
+    {"name": "Miyapur", "lat": 17.4966, "lng": 78.3580},
+    {"name": "JNTU College", "lat": 17.4930, "lng": 78.3910},
+    {"name": "KPHB Colony", "lat": 17.4894, "lng": 78.3986},
+    {"name": "Kukatpally", "lat": 17.4849, "lng": 78.3993},
+    {"name": "Balanagar", "lat": 17.4736, "lng": 78.4058},
+    {"name": "Moosapet", "lat": 17.4670, "lng": 78.4180},
+    {"name": "Erragadda", "lat": 17.4552, "lng": 78.4340},
+    {"name": "SR Nagar", "lat": 17.4430, "lng": 78.4430},
+    {"name": "Ameerpet", "lat": 17.4374, "lng": 78.4487},
+    {"name": "Punjagutta", "lat": 17.4256, "lng": 78.4560},
+    {"name": "Khairatabad", "lat": 17.4130, "lng": 78.4620},
+    {"name": "Assembly", "lat": 17.4009, "lng": 78.4720},
+    {"name": "MG Bus Station", "lat": 17.3810, "lng": 78.4790},
+    {"name": "LB Nagar", "lat": 17.3510, "lng": 78.5520},
+    {"name": "Nagole", "lat": 17.3806, "lng": 78.5588},
+    {"name": "Uppal", "lat": 17.3982, "lng": 78.5590},
+    {"name": "Habsiguda", "lat": 17.4058, "lng": 78.5290},
+    {"name": "Begumpet", "lat": 17.4440, "lng": 78.4640},
+    {"name": "Madhura Nagar", "lat": 17.4425, "lng": 78.4290},
+    {"name": "Jubilee Hills Check Post", "lat": 17.4310, "lng": 78.4070},
+    {"name": "Peddamma Temple", "lat": 17.4380, "lng": 78.4020},
+    {"name": "Madhapur", "lat": 17.4483, "lng": 78.3915},
+    {"name": "Durgam Cheruvu", "lat": 17.4460, "lng": 78.3860},
+    {"name": "Hitec City", "lat": 17.4485, "lng": 78.3800},
+    {"name": "Raidurg", "lat": 17.4425, "lng": 78.3760},
+    {"name": "Secunderabad East", "lat": 17.4399, "lng": 78.4983},
+    {"name": "Parade Ground", "lat": 17.4450, "lng": 78.4970},
+    {"name": "JBS", "lat": 17.4520, "lng": 78.4980}
+  ],
+  "train_stations": [
+    {"name": "Secunderabad Junction", "lat": 17.4344, "lng": 78.5013},
+    {"name": "Hyderabad Deccan (Nampally)", "lat": 17.3853, "lng": 78.4666},
+    {"name": "Kacheguda", "lat": 17.3906, "lng": 78.4948},
+    {"name": "Lingampally", "lat": 17.4855, "lng": 78.3175},
+    {"name": "Begumpet", "lat": 17.4451, "lng": 78.4614},
+    {"name": "Hitec City MMTS", "lat": 17.4487, "lng": 78.3762},
+    {"name": "Malkajgiri", "lat": 17.4463, "lng": 78.5266}
+  ],
+  "bus_stops": [
+    {"name": "Kondapur Bus Stop", "lat": 17.4615, "lng": 78.3600},
+    {"name": "Gachibowli Bus Stop", "lat": 17.4400, "lng": 78.3489},
+    {"name": "Ameerpet Bus Stop", "lat": 17.4370, "lng": 78.4480},
+    {"name": "Mehdipatnam Bus Stop", "lat": 17.3960, "lng": 78.4380},
+    {"name": "Koti Bus Stop", "lat": 17.3835, "lng": 78.4830},
+    {"name": "Dilsukhnagar Bus Stop", "lat": 17.3687, "lng": 78.5247},
+    {"name": "Kukatpally Bus Stop", "lat": 17.4849, "lng": 78.4090},
+    {"name": "Manikonda Bus Stop", "lat": 17.4040, "lng": 78.3690}
+  ]
+}

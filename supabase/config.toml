@@ -1,0 +1,58 @@
+# Supabase CLI project config.
+# The important part is verify_jwt: which functions the public may call with
+# the anon key, and which are reachable without any Supabase auth at all.
+
+project_id = "hyderabad-property-map"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 500          # a runaway PostREST query cannot pull the whole table
+
+[db]
+port = 54322
+major_version = 15
+
+[studio]
+enabled = true
+port = 54323
+
+# --- Edge functions ---------------------------------------------------------
+# Called from the browser with the anon key attached.
+[functions.handle_interest_submission]
+verify_jwt = true
+
+[functions.submit_listing]
+verify_jwt = true
+
+[functions.submit_rent_report]
+verify_jwt = true
+
+[functions.submit_seeker]
+verify_jwt = true
+
+[functions.submit_board_sighting]
+verify_jwt = true
+
+[functions.fetch_places_with_cache]
+verify_jwt = true
+
+[functions.fetch_aqi]
+verify_jwt = true
+
+[functions.create_razorpay_order]
+verify_jwt = true
+
+# Called by Razorpay's servers — authenticated by HMAC signature instead.
+[functions.razorpay_webhook]
+verify_jwt = false
+
+# Opened straight from an email client — authenticated by the one-time token.
+[functions.listing_action]
+verify_jwt = false
+
+# Internal only: service role key required.
+[functions.send_interest_email]
+verify_jwt = true
