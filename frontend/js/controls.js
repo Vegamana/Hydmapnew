@@ -26,6 +26,16 @@ const layers = {
 
 let transitData = null;
 
+// Google's own base-map styling has no "subway only" feature type — rail and
+// subway/metro stations both fall under `transit.station.rail`, icon and all
+// (that icon is where the default "Ⓜ" comes from). Since we draw our own
+// metro stations and lines from transit.json only when the Metro layer is
+// on, Google's copy stays hidden until that toggle says otherwise, instead
+// of doubling up on every station all the time.
+const HIDE_DEFAULT_RAIL_ICON = [
+  { featureType: "transit.station.rail", elementType: "labels", stylers: [{ visibility: "off" }] },
+];
+
 async function loadTransit() {
   if (transitData) return transitData;
   const res = await fetch("./data/transit.json");
@@ -37,6 +47,8 @@ async function loadTransit() {
 // ── metro / train / bus ───────────────────────────────────────────────
 async function toggleMetro(on) {
   const layer = layers.metro;
+  state.map.setOptions({ styles: on ? [] : HIDE_DEFAULT_RAIL_ICON });
+
   if (!on) {
     layer.polylines.forEach((p) => p.setMap(null));
     layer.markers.forEach((m) => m.setMap(null));
@@ -195,6 +207,11 @@ const HANDLERS = {
 };
 
 export function initControls(rail) {
+  // Metro starts toggled off, so Google's default rail icon starts hidden
+  // too — otherwise it shows on first paint until the user touches the
+  // Metro button once.
+  state.map.setOptions({ styles: HIDE_DEFAULT_RAIL_ICON });
+
   rail.addEventListener("click", async (event) => {
     const button = event.target.closest("[data-layer]");
     if (!button) return;
