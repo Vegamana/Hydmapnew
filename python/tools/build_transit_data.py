@@ -52,9 +52,59 @@ def guess_colour(name: str, tags: dict) -> str:
     return "#4A5A64"
 
 
+def _pt_eq(a: dict, b: dict, eps: float = 1e-5) -> bool:
+    return abs(a["lat"] - b["lat"]) < eps and abs(a["lng"] - b["lng"]) < eps
+
+
+def stitch_segments(segments: list[list[dict]]) -> list[dict]:
+    """Chain a relation's way-member geometries into one continuous path.
+
+    OSM route relations don't reliably list members in physical order or a
+    consistent direction — Overpass hands them back in whatever order the
+    relation happens to store them. Concatenating that order as-is draws a
+    line that zigzags across the map wherever two adjacent members are
+    actually reversed or out of sequence relative to each other (this hit
+    Hyderabad's Red Line specifically: 7 jumps of several km each). Greedily
+    growing a chain from whichever end matches the next unplaced segment's
+    start *or* end fixes the common case; a segment that truly doesn't touch
+    the chain (a real gap in the source data) gets appended rather than
+    dropped, so no data silently vanishes even though that spot will still
+    show a jump.
+    """
+    remaining = [s for s in segments if s]
+    if not remaining:
+        return []
+
+    chain = list(remaining.pop(0))
+    while remaining:
+        for i, seg in enumerate(remaining):
+            if _pt_eq(chain[-1], seg[0]):
+                chain.extend(seg[1:])
+            elif _pt_eq(chain[-1], seg[-1]):
+                chain.extend(list(reversed(seg))[1:])
+            elif _pt_eq(chain[0], seg[-1]):
+                chain = seg[:-1] + chain
+            elif _pt_eq(chain[0], seg[0]):
+                chain = list(reversed(seg))[:-1] + chain
+            else:
+                continue
+            remaining.pop(i)
+            break
+        else:
+            # Nothing left touches either end of the chain — a genuine gap
+            # in the source data, not an ordering problem. Append it so the
+            # rest of the network still makes it into the file.
+            chain.extend(remaining.pop(0))
+    return chain
+
+
 def main() -> None:
     log.info("querying Overpass...")
-    with httpx.Client(timeout=180) as client:
+    # Overpass's own usage policy asks for an identifying User-Agent, and in
+    # practice rejects the default `python-httpx/...` one with a bare 406 —
+    # library-shaped user agents get blanket-filtered as bot traffic.
+    headers = {"User-Agent": "hyd-map-transit-builder/1.0 (github.com/hyd-map)"}
+    with httpx.Client(timeout=180, headers=headers) as client:
         res = client.post(OVERPASS, data={"data": QUERY})
         res.raise_for_status()
         payload = res.json()
@@ -66,10 +116,13 @@ def main() -> None:
         name = tags.get("name", "")
 
         if element["type"] == "relation" and tags.get("route") == "subway":
-            path = []
+            segments = []
             for member in element.get("members", []):
-                for point in member.get("geometry", []) or []:
-                    path.append({"lat": point["lat"], "lng": point["lon"]})
+                geom = member.get("geometry") or []
+                points = [{"lat": p["lat"], "lng": p["lon"]} for p in geom]
+                if points:
+                    segments.append(points)
+            path = stitch_segments(segments)
             if path:
                 metro_lines.append({"name": name, "color": guess_colour(name, tags), "path": path})
 

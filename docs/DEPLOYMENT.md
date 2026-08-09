@@ -33,12 +33,13 @@ reset role;
 
 If either of those returns data, stop and re-run `0002_rls.sql`.
 
-**Set the function secrets:**
+**Set the function secrets.** `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`
+are not in this list on purpose — Supabase auto-injects both into every edge
+function at runtime, and `supabase secrets set` refuses to override them
+(prints "Env name cannot start with SUPABASE_, skipping" and does nothing):
 
 ```bash
 supabase secrets set \
-  SUPABASE_URL=https://<ref>.supabase.co \
-  SUPABASE_SERVICE_ROLE_KEY=<service-role-key> \
   GOOGLE_PLACES_API_KEY=<server-key> \
   RESEND_API_KEY=<resend-key> \
   RESEND_FROM="Hyderabad Property Map <notify@yourdomain.com>" \

@@ -3,8 +3,8 @@
 -- Run with: supabase db push   (or paste into the SQL editor)
 -- =====================================================================
 
-create extension if not exists postgis;      -- geography type + spatial index
-create extension if not exists pgcrypto;     -- gen_random_uuid / gen_random_bytes
+create extension if not exists postgis;                            -- geography type + spatial index
+create extension if not exists pgcrypto with schema extensions;     -- gen_random_bytes (gen_random_uuid is a Postgres 13+ builtin, no extension needed)
 
 -- ---------------------------------------------------------------------
 -- Enums
@@ -155,7 +155,11 @@ create index if not exists comments_listing_idx on public.comments (listing_id, 
 -- ---------------------------------------------------------------------
 create table if not exists public.email_events (
   id           uuid primary key default gen_random_uuid(),
-  token        text unique not null default encode(gen_random_bytes(9), 'hex'),
+  -- Schema-qualified: hosted Supabase installs pgcrypto into `extensions`,
+  -- which isn't on the migration role's search_path, so the unqualified
+  -- name resolves locally (where it happened to already be installed
+  -- somewhere visible) but not against a fresh hosted project.
+  token        text unique not null default encode(extensions.gen_random_bytes(9), 'hex'),
   kind         text not null check (kind in ('interest_notification','aging_reminder','comment_notification')),
   listing_id   uuid references public.listings(id) on delete cascade,
   interest_id  uuid references public.interests(id) on delete set null,
