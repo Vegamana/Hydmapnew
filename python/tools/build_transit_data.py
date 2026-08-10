@@ -13,6 +13,7 @@ Run it manually when the network changes (a new line opens, stations rename):
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 
 import httpx
@@ -98,6 +99,50 @@ def stitch_segments(segments: list[list[dict]]) -> list[dict]:
     return chain
 
 
+def _perp_distance(pt: dict, start: dict, end: dict) -> float:
+    """Perpendicular distance from pt to the line through start/end, in
+    degrees — fine for the tiny local extent of one metro line."""
+    if start == end:
+        return math.hypot(pt["lat"] - start["lat"], pt["lng"] - start["lng"])
+    x, y = pt["lng"], pt["lat"]
+    x1, y1 = start["lng"], start["lat"]
+    x2, y2 = end["lng"], end["lat"]
+    num = abs((y2 - y1) * x - (x2 - x1) * y + x2 * y1 - y2 * x1)
+    den = math.hypot(y2 - y1, x2 - x1)
+    return num / den if den else 0.0
+
+
+def simplify_path(points: list[dict], epsilon: float) -> list[dict]:
+    """Douglas-Peucker line simplification.
+
+    OSM way geometry is survey-precision — a metro line comes back as ~500
+    points per direction, most of them sub-metre wiggle that reads as noise
+    at map zoom rather than as the route's actual shape. Iterative (not
+    recursive) to avoid Python's recursion ceiling on a ~500-point line.
+    """
+    if len(points) < 3:
+        return points
+
+    keep = [False] * len(points)
+    keep[0] = keep[-1] = True
+    stack = [(0, len(points) - 1)]
+
+    while stack:
+        start_i, end_i = stack.pop()
+        start, end = points[start_i], points[end_i]
+        dmax, idx = 0.0, None
+        for i in range(start_i + 1, end_i):
+            d = _perp_distance(points[i], start, end)
+            if d > dmax:
+                dmax, idx = d, i
+        if idx is not None and dmax > epsilon:
+            keep[idx] = True
+            stack.append((start_i, idx))
+            stack.append((idx, end_i))
+
+    return [p for p, k in zip(points, keep) if k]
+
+
 def main() -> None:
     log.info("querying Overpass...")
     # Overpass's own usage policy asks for an identifying User-Agent, and in
@@ -123,6 +168,9 @@ def main() -> None:
                 if points:
                     segments.append(points)
             path = stitch_segments(segments)
+            # ~0.00008° ≈ 9m at Hyderabad's latitude: enough to shave off
+            # survey noise without flattening a real curve the track takes.
+            path = simplify_path(path, epsilon=0.00008)
             if path:
                 metro_lines.append({"name": name, "color": guess_colour(name, tags), "path": path})
 
