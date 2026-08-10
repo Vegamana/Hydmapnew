@@ -16,7 +16,7 @@ import { debounce } from "./format.js";
 import { toast } from "./toast.js";
 
 const layers = {
-  metro:     { polylines: [], markers: [], loaded: false },
+  metro:     { polylines: [], loaded: false },
   train:     { markers: [] },
   bus:       { markers: [] },
   heatmap:   { instance: null },
@@ -27,11 +27,11 @@ const layers = {
 let transitData = null;
 
 // Google's own base-map styling has no "subway only" feature type — rail and
-// subway/metro stations both fall under `transit.station.rail`, icon and all
-// (that icon is where the default "Ⓜ" comes from). Since we draw our own
-// metro stations and lines from transit.json only when the Metro layer is
-// on, Google's copy stays hidden until that toggle says otherwise, instead
-// of doubling up on every station all the time.
+// subway/metro stations both fall under `transit.station.rail`, icon and
+// all (that icon is where the default "Ⓜ" comes from). We draw our own
+// metro lines from transit.json without any per-station markers at all
+// (see toggleMetro below), so Google's copy of that icon stays off
+// permanently rather than needing its own layer to compensate for.
 const HIDE_DEFAULT_RAIL_ICON = [
   { featureType: "transit.station.rail", elementType: "labels", stylers: [{ visibility: "off" }] },
 ];
@@ -45,14 +45,16 @@ async function loadTransit() {
 }
 
 // ── metro / train / bus ───────────────────────────────────────────────
+// Lines only, no per-station markers — a marker at every single stop (Red +
+// Blue + Green run to ~70 stations combined) reads as clutter rather than
+// information. The route colour and shape already say where the lines run;
+// riders zoom the underlying map for the stop names.
 async function toggleMetro(on) {
   const layer = layers.metro;
-  state.map.setOptions({ styles: on ? [] : HIDE_DEFAULT_RAIL_ICON });
 
   if (!on) {
     layer.polylines.forEach((p) => p.setMap(null));
-    layer.markers.forEach((m) => m.setMap(null));
-    layer.polylines = []; layer.markers = [];
+    layer.polylines = [];
     return;
   }
 
@@ -67,12 +69,6 @@ async function toggleMetro(on) {
       map: state.map,
       zIndex: 2,
     }));
-
-  layer.markers = (data.metro_stations || []).map((station) => {
-    const marker = createMarker(state.maps, station, poiElement("Ⓜ", `${station.name} metro station`), { pane: "overlayLayer" });
-    marker.setMap(state.map);
-    return marker;
-  });
 }
 
 function toggleStops(key, glyph, dataKey, suffix) {
