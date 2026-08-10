@@ -16,7 +16,7 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: geolocation=(self), camera=(), microphone=(), payment=(self)
-  Content-Security-Policy: default-src 'self'; script-src 'self' https://maps.googleapis.com https://checkout.razorpay.com 'unsafe-inline'; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com https://*.google.com https://*.supabase.co; connect-src 'self' https://*.supabase.co https://maps.googleapis.com https://places.googleapis.com https://api.razorpay.com https://lumberjack.razorpay.com; frame-src https://api.razorpay.com https://checkout.razorpay.com
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://maps.googleapis.com https://checkout.razorpay.com https://static.cloudflareinsights.com 'unsafe-inline'; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com https://*.google.com https://*.supabase.co; connect-src 'self' https://*.supabase.co https://maps.googleapis.com https://places.googleapis.com https://api.razorpay.com https://lumberjack.razorpay.com https://cloudflareinsights.com; frame-src https://api.razorpay.com https://checkout.razorpay.com
 
 /index.html
   Cache-Control: public, max-age=0, must-revalidate
