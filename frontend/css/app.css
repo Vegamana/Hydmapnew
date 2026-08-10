@@ -186,29 +186,33 @@ body.is-picking-location #map { cursor: crosshair; }
 }
 .sighting.is-in { opacity: 1; }
 
-/* ── Layer rail: vertical icon rail, top-right ────────────────────── */
+/* ── Layer toggle: Metro / Satellite, top-right ───────────────────── */
+/* Two independent icon tiles, not one bordered list — each carries its own
+   card/shadow, `.rail` itself is just the flex row positioning them. That's
+   the Uber/Airbnb map-control shape: a small cluster of square glass
+   buttons floating over the map, not a form control. */
 .rail {
   top: 16px; right: 16px; bottom: auto;
-  display: flex; flex-direction: column; gap: 2px;
-  padding: 6px;
+  display: flex; flex-direction: row; gap: 10px;
+  background: none; border: none; box-shadow: none; padding: 0;
 }
 .rail__btn {
-  display: flex; align-items: center; gap: 9px;
-  border: 0; background: none; border-radius: var(--r-md);
-  padding: 9px 12px 9px 9px; font-size: 13.5px; font-weight: 500;
-  color: var(--ink-soft); text-align: left; white-space: nowrap;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+  width: 60px; height: 60px; flex: none;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg);
+  box-shadow: var(--shadow);
+  color: var(--ink-soft); font-size: 10.5px; font-weight: 600; letter-spacing: -.01em;
+  transition: transform .14s var(--ease), box-shadow .14s var(--ease),
+              background .14s var(--ease), border-color .14s var(--ease), color .14s var(--ease);
 }
-.rail__btn:hover { background: var(--paper); color: var(--ink); }
-.rail__btn[aria-pressed="true"] { background: var(--terracotta-lo); color: var(--terracotta); font-weight: 600; }
-
-/* Abstract shape marks, not icons — each layer gets its own silhouette. */
-.rail__mark { width: 16px; height: 16px; border-radius: 4px; flex: none; border: 1.5px solid currentColor; opacity: .55; }
-.rail__btn[aria-pressed="true"] .rail__mark { opacity: 1; background: currentColor; }
-.rail__mark[data-mark="metro"] { border-radius: 2px; }
-.rail__mark[data-mark="train"] { border-radius: 50% 50% 4px 4px; }
-.rail__mark[data-mark="bus"]   { border-radius: 4px 4px 50% 50%; }
-.rail__mark[data-mark="heat"]  { border-radius: 50%; }
-.rail__mark[data-mark="aqi"]   { border-radius: 50% 4px 50% 4px; }
+.rail__btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-lift); color: var(--ink); }
+.rail__btn:active { transform: translateY(0); }
+.rail__btn[aria-pressed="true"] {
+  background: var(--terracotta); border-color: var(--terracotta); color: #fff;
+  box-shadow: var(--shadow-lift);
+}
+.rail__mark { width: 22px; height: 22px; flex: none; }
+.rail__mark svg { width: 100%; height: 100%; display: block; }
 
 /* ── Rent pulse (signature) ───────────────────────────────────────── */
 .pulse {
@@ -491,13 +495,13 @@ body.is-picking-location #map { cursor: crosshair; }
   .search { top: 10px; left: 10px; right: 10px; width: auto; }
   .list-btn { top: 74px; left: 10px; padding: 9px 14px; font-size: 13px; }
   .field-row { grid-template-columns: 1fr; }
-  .rail {
-    top: auto; right: 10px; left: 10px; bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
-    flex-direction: row; overflow-x: auto; border-radius: 999px;
-    scrollbar-width: none;
-  }
-  .rail::-webkit-scrollbar { display: none; }
-  .rail__btn { padding: 8px 12px; }
+  /* Same row as list-btn — search is full-width above both, so this sits
+     top-right at the same offset list-btn sits top-left at. Only two tiles
+     now, so the old bottom-bar/horizontal-scroll treatment for a six-item
+     rail doesn't apply any more. */
+  .rail { top: 74px; right: 10px; bottom: auto; left: auto; gap: 8px; }
+  .rail__btn { width: 52px; height: 52px; font-size: 9.5px; }
+  .rail__mark { width: 19px; height: 19px; }
 
   .pulse { left: 10px; right: 10px; width: auto; bottom: calc(env(safe-area-inset-bottom, 0px) + 68px); }
   .pulse__value { font-size: 28px; }
