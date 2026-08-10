@@ -75,7 +75,11 @@ def send_reminder(conn, listing: dict, stage: int) -> bool:
     token = event["token"]
 
     price = inr(listing["price"])
-    subject = f"[HPM-{token}] Still available? {listing['title']} (day {stage})"
+    # Token at the end, not the front: TOKEN_RE in email_processor.py searches
+    # anywhere in the subject (not anchored), so this doesn't break reply
+    # parsing — it just stops every inbox preview leading with 18 hex
+    # characters before the human-readable part.
+    subject = f"Still available? {listing['title']} (day {stage}) [HPM-{token}]"
 
     context = {
         "listing_title": listing["title"],

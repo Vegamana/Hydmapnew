@@ -103,7 +103,7 @@ export function interestEmail(d: InterestMailData) {
   ].filter(Boolean).join("\n");
 
   return {
-    subject: `[HPM-${d.token}] ${d.name} is interested in ${d.listingTitle}`,
+    subject: `${d.name} is interested in ${d.listingTitle} [HPM-${d.token}]`,
     html: shell("New enquiry", inner, footer),
     text,
   };
@@ -154,7 +154,7 @@ export function listingConfirmationEmail(d: ListingConfirmationMailData) {
   ].join("\n");
 
   return {
-    subject: `[HPM-${d.token}] Confirm your listing: ${d.listingTitle}`,
+    subject: `Confirm your listing: ${d.listingTitle} [HPM-${d.token}]`,
     html: shell("Confirm your listing", inner, footer),
     text,
   };
@@ -229,7 +229,7 @@ export function agingEmail(d: AgingMailData) {
   ].join("\n");
 
   return {
-    subject: `[HPM-${d.token}] Still available? ${d.listingTitle} (day ${d.days})`,
+    subject: `Still available? ${d.listingTitle} (day ${d.days}) [HPM-${d.token}]`,
     html: shell("Still available?", inner, footer),
     text,
   };
