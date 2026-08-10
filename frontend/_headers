@@ -27,8 +27,10 @@
 /js/*
   Cache-Control: public, max-age=0, must-revalidate
 
-# transit.json changes only when someone deliberately reruns
-# build_transit_data.py, not on every deploy — a short cache here is a
-# deliberate tradeoff, not the same bug as above.
+# Same reasoning as /js/* and /css/* above, and today's proof it isn't just
+# theoretical: transit.json changed (metro line simplification) and the old
+# 1-day cache here meant it wouldn't have shown up live for up to 24h. This
+# file is fetched once per session, not per-viewport, so must-revalidate's
+# conditional-GET cost is trivial next to guaranteed staleness.
 /data/*
-  Cache-Control: public, max-age=86400
+  Cache-Control: public, max-age=0, must-revalidate
