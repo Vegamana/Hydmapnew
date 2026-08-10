@@ -1,6 +1,15 @@
 # Cloudflare Pages headers.
-# Fingerprinting is by content hash on Pages, so HTML stays uncached while the
-# static assets can be held for a year.
+#
+# No fingerprinting: this project has no build step, so every JS/CSS file
+# keeps the same fixed name across every deploy forever (frontend/js/map.js
+# is always frontend/js/map.js — nothing hashes it to frontend/js/map.a3f8e1.js
+# the way a bundler output would). `immutable, max-age=31536000` is only safe
+# when a *new* version gets a *new* URL; here it just means a browser that
+# visited once keeps serving year-old JavaScript no matter how many times the
+# site redeploys after that. must-revalidate makes every load check back with
+# the server (a cheap 304 when nothing changed, the real bytes the moment
+# something did) instead of trusting a TTL that has no way to know the file
+# underneath it changed.
 
 /*
   X-Frame-Options: DENY
@@ -13,10 +22,13 @@
   Cache-Control: public, max-age=0, must-revalidate
 
 /css/*
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=0, must-revalidate
 
 /js/*
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=0, must-revalidate
 
+# transit.json changes only when someone deliberately reruns
+# build_transit_data.py, not on every deploy — a short cache here is a
+# deliberate tradeoff, not the same bug as above.
 /data/*
   Cache-Control: public, max-age=86400
