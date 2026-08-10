@@ -118,8 +118,10 @@ button { cursor: pointer; }
 .search__results li[aria-selected="true"], .search__results li:hover { background: var(--paper); }
 
 /* ── List a flat ──────────────────────────────────────────────────── */
+/* Below the search bar, same left edge — the rail (Metro/Satellite) took
+   over the top-right spot this used to sit in. */
 .list-btn {
-  position: fixed; z-index: 10; top: 16px; right: 16px;
+  position: fixed; z-index: 10; top: 82px; left: 16px;
   border: 1px solid var(--terracotta); background: var(--terracotta); color: #fff;
   border-radius: var(--r-md); padding: 12px 18px; font-size: 14px; font-weight: 600;
   font-family: var(--display); letter-spacing: -.005em;
@@ -184,9 +186,9 @@ body.is-picking-location #map { cursor: crosshair; }
 }
 .sighting.is-in { opacity: 1; }
 
-/* ── Layer rail: vertical icon rail, bottom-right ────────────────── */
+/* ── Layer rail: vertical icon rail, top-right ────────────────────── */
 .rail {
-  top: auto; bottom: 16px; right: 16px;
+  top: 16px; right: 16px; bottom: auto;
   display: flex; flex-direction: column; gap: 2px;
   padding: 6px;
 }
@@ -487,7 +489,7 @@ body.is-picking-location #map { cursor: crosshair; }
 /* ── Mobile ───────────────────────────────────────────────────────── */
 @media (max-width: 720px) {
   .search { top: 10px; left: 10px; right: 10px; width: auto; }
-  .list-btn { top: 66px; right: 10px; padding: 9px 14px; font-size: 13px; }
+  .list-btn { top: 74px; left: 10px; padding: 9px 14px; font-size: 13px; }
   .field-row { grid-template-columns: 1fr; }
   .rail {
     top: auto; right: 10px; left: 10px; bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
