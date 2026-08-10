@@ -40,12 +40,16 @@
 <button class="list-btn" id="list-open" type="button">List my flat</button>
 
 <!-- ── Layer rail ─────────────────────────────────────────────────── -->
-<nav class="rail" id="rail" aria-label="Map layers">
-  <button class="rail__btn" data-layer="metro"     aria-pressed="false"><span class="rail__mark" data-mark="metro"></span>Metro</button>
+<!-- Trains / Buses / Density / Air are pulled from the UI for now (their
+     handlers are untouched in controls.js — re-adding is just restoring
+     these three buttons):
   <button class="rail__btn" data-layer="train"     aria-pressed="false"><span class="rail__mark" data-mark="train"></span>Trains</button>
   <button class="rail__btn" data-layer="bus"       aria-pressed="false"><span class="rail__mark" data-mark="bus"></span>Buses</button>
   <button class="rail__btn" data-layer="heatmap"   aria-pressed="false"><span class="rail__mark" data-mark="heat"></span>Density</button>
   <button class="rail__btn" data-layer="aqi"       aria-pressed="false"><span class="rail__mark" data-mark="aqi"></span>Air</button>
+-->
+<nav class="rail" id="rail" aria-label="Map layers">
+  <button class="rail__btn" data-layer="metro"     aria-pressed="false"><span class="rail__mark" data-mark="metro"></span>Metro</button>
   <button class="rail__btn" data-layer="satellite" aria-pressed="false"><span class="rail__mark" data-mark="sat"></span>Satellite</button>
 </nav>
 
