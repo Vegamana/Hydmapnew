@@ -327,6 +327,20 @@ body.is-picking-location #map { cursor: crosshair; }
 }
 .poi.is-in { opacity: 1; }
 
+/* Metro stations: a quiet placeholder, not a permanent label — the name
+   shows on click (see controls.js), so ~70 of these don't read as clutter
+   the way a full Ⓜ badge at every stop did. */
+.station-dot {
+  position: absolute; transform: translate(-50%, -50%);
+  width: 10px; height: 10px; padding: 0; border-radius: 50%;
+  background: var(--card); border: 2px solid var(--terracotta);
+  box-shadow: var(--shadow); cursor: pointer;
+  opacity: 0; transition: opacity .2s var(--ease), transform .15s var(--ease);
+  will-change: transform, opacity;
+}
+.station-dot.is-in { opacity: 1; }
+.station-dot:hover { transform: translate(-50%, -50%) scale(1.5); }
+
 /* ── Listing sheet ────────────────────────────────────────────────── */
 .sheet {
   left: 16px; top: 84px; bottom: 176px;

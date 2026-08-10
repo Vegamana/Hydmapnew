@@ -133,3 +133,18 @@ export function poiElement(glyph, label) {
   el.setAttribute("aria-label", label);
   return el;
 }
+
+/**
+ * A quiet placeholder dot for a transit stop — the name shows up on click
+ * (via onClick), not as a permanent label, so ~70 metro stations don't turn
+ * into ~70 permanent text labels crowding the line.
+ */
+export function stationDotElement(name, onClick) {
+  const el = document.createElement("button");
+  el.type = "button";
+  el.className = "station-dot";
+  el.title = name;
+  el.setAttribute("aria-label", `${name} metro station`);
+  el.addEventListener("click", onMarkerClick(onClick));
+  return el;
+}

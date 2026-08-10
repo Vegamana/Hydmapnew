@@ -10,13 +10,13 @@
  */
 import { state, viewport } from "./map.js";
 import { fetchAqi, fetchListingPoints } from "./api.js";
-import { createMarker, poiElement } from "./markers.js";
+import { createMarker, poiElement, stationDotElement } from "./markers.js";
 import { DEFAULTS } from "./config.js";
 import { debounce } from "./format.js";
 import { toast } from "./toast.js";
 
 const layers = {
-  metro:     { polylines: [], loaded: false },
+  metro:     { polylines: [], markers: [], loaded: false },
   train:     { markers: [] },
   bus:       { markers: [] },
   heatmap:   { instance: null },
@@ -35,16 +35,19 @@ async function loadTransit() {
 }
 
 // ── metro / train / bus ───────────────────────────────────────────────
-// Lines only, no per-station markers — a marker at every single stop (Red +
-// Blue + Green run to ~70 stations combined) reads as clutter rather than
-// information. The route colour and shape already say where the lines run;
-// riders zoom the underlying map for the stop names.
+// Lines plus a quiet dot at each stop — a permanent Ⓜ badge at every single
+// stop (Red + Blue + Green run to ~70 stations combined) read as clutter,
+// but a bare line with no stop markers at all left no way to find a
+// station's name short of zooming into Google's own (inconsistently
+// present) icons. A small dot is the middle ground: present, but the name
+// only appears when you actually want it, on click.
 async function toggleMetro(on) {
   const layer = layers.metro;
 
   if (!on) {
     layer.polylines.forEach((p) => p.setMap(null));
-    layer.polylines = [];
+    layer.markers.forEach((m) => m.setMap(null));
+    layer.polylines = []; layer.markers = [];
     return;
   }
 
@@ -59,6 +62,14 @@ async function toggleMetro(on) {
       map: state.map,
       zIndex: 2,
     }));
+
+  layer.markers = (data.metro_stations || []).map((station) => {
+    const marker = createMarker(state.maps, station,
+      stationDotElement(station.name, () => toast(station.name)),
+      { pane: "overlayLayer" });
+    marker.setMap(state.map);
+    return marker;
+  });
 }
 
 function toggleStops(key, glyph, dataKey, suffix) {
