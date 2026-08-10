@@ -88,19 +88,51 @@ export function bubbleElement(pointCount, onClick) {
   return el;
 }
 
+// ── category badge (shared by every price chip) ────────────────────────
+// Three colours, matching the legend card exactly: rent (green/home),
+// sharing (amber/people), paid (purple/check). `get_clusters` only knows a
+// real listing_type for individual listings (kind: "listing") — an
+// aggregate price-range bucket can mix all three types, so there's no
+// single category to show and it falls back to rent's colour rather than
+// guessing (see 0008_get_clusters_listing_type.sql).
+const CHIP_ICON = {
+  rent: '<path d="M4 11.5L12 5l8 6.5M6 10v8.5a1 1 0 0 0 1 1h3v-5h4v5h3a1 1 0 0 0 1-1V10" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
+  sharing: '<circle cx="9" cy="8.3" r="2.3" stroke="#fff" stroke-width="1.7"/><circle cx="16.3" cy="9.3" r="1.9" stroke="#fff" stroke-width="1.7"/><path d="M4.2 19c0-2.8 2.1-5 4.8-5s4.8 2.2 4.8 5M14.7 19c0-2.1-.6-3.8-1.9-5a3.8 3.8 0 0 1 5.2 3.6V19" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/>',
+  paid: '<circle cx="12" cy="12" r="8" stroke="#fff" stroke-width="1.7"/><path d="M8.4 12.3l2.3 2.3 4.9-5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
+};
+
+function categoryFor(listingType) {
+  if (listingType === "sharing") return "sharing";
+  if (listingType === "rent_paid") return "paid";
+  return "rent"; // rent, sale (no dedicated category — see brief), and unknown/mixed aggregates
+}
+
+function chipIcon(category) {
+  const span = document.createElement("span");
+  span.className = "chip__icon";
+  span.innerHTML = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">${CHIP_ICON[category]}</svg>`;
+  return span;
+}
+
 /** Zoom 11–15: a price range for everything in the grid cell. */
 export function rangeElement(cluster, onClick) {
   const el = document.createElement("button");
   el.type = "button";
-  el.className = `chip${cluster.price_kind === "one_time" ? " chip--sale" : ""}`;
+  const category = categoryFor(cluster.listing_type);
+  el.className = "chip";
+  el.dataset.category = category;
+  el.append(chipIcon(category));
 
   const low = money(cluster.min_price, { compact: true });
   const high = money(cluster.max_price, { compact: true });
-  el.textContent = low === high ? low : `${low}–${high}`;
+  const price = document.createElement("span");
+  price.className = "chip__price";
+  price.textContent = low === high ? low : `${low}–${high}`;
+  el.append(price);
 
   if (cluster.point_count > 1) {
     const tally = document.createElement("span");
-    tally.style.cssText = "opacity:.55;margin-left:6px";
+    tally.className = "chip__tally";
     tally.textContent = `·${cluster.point_count}`;
     el.append(tally);
   }
@@ -115,9 +147,17 @@ export function rangeElement(cluster, onClick) {
 export function listingElement(listing, onClick) {
   const el = document.createElement("button");
   el.type = "button";
-  el.className = `chip${listing.price_kind === "one_time" ? " chip--sale" : ""}`;
+  const category = categoryFor(listing.listing_type);
+  el.className = "chip";
+  el.dataset.category = category;
   el.dataset.listingId = listing.listing_id;
-  el.textContent = money(listing.min_price, { compact: true });
+  el.append(chipIcon(category));
+
+  const price = document.createElement("span");
+  price.className = "chip__price";
+  price.textContent = money(listing.min_price, { compact: true });
+  el.append(price);
+
   el.setAttribute("aria-label", `${listing.title} — ${money(listing.min_price)}`);
   el.addEventListener("click", onMarkerClick(onClick));
   return el;

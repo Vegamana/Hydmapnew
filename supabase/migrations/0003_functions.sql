@@ -28,16 +28,17 @@ create or replace function public.get_clusters(
   p_max_price numeric      default null
 )
 returns table (
-  kind        text,
-  lat         double precision,
-  lng         double precision,
-  point_count integer,
-  min_price   numeric,
-  max_price   numeric,
-  avg_price   numeric,
-  price_kind  text,
-  listing_id  uuid,
-  title       text
+  kind          text,
+  lat           double precision,
+  lng           double precision,
+  point_count   integer,
+  min_price     numeric,
+  max_price     numeric,
+  avg_price     numeric,
+  price_kind    text,
+  listing_id    uuid,
+  title         text,
+  listing_type  text
 )
 language plpgsql
 stable
@@ -61,14 +62,16 @@ begin
     else 0.0
   end;
 
-  -- Tier 3: individual listings.
+  -- Tier 3: individual listings. listing_type is real here (one row = one
+  -- listing) — this is what lets the frontend colour a chip by its actual
+  -- category (rent/sharing/rent_paid) instead of just recurring-vs-sale.
   if grid = 0.0 then
     return query
       select 'listing'::text,
              l.lat, l.lng, 1,
              l.price, l.price, l.price,
              case when l.type = 'sale' then 'one_time' else 'recurring' end,
-             l.id, l.title
+             l.id, l.title, l.type::text
       from public.listings l
       where l.status = 'active'
         and l.lat between min_lat and max_lat
@@ -112,7 +115,8 @@ begin
            b.clat, b.clng, b.n,
            round(b.pmin), round(b.pmax), round(b.pavg),
            b.pk,
-           null::uuid, null::text
+           null::uuid, null::text,
+           null::text   -- a bucket can mix rent/sharing/rent_paid; no single type describes it
     from bucketed b
     order by b.n desc
     limit 300;

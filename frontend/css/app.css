@@ -29,6 +29,15 @@
   --teal-lo:      #3E7C741a;
   --ivory:        #FBF7EF;   /* warmer than --card, for the premium chooser card */
 
+  /* Listing-category system, shared by the legend card and every map chip —
+     one set of colours, defined once. */
+  --cat-rent:     #3F8F5C;
+  --cat-rent-lo:  #3F8F5C1a;
+  --cat-sharing:  #C08A2E;
+  --cat-sharing-lo:#C08A2E1a;
+  --cat-paid:     #6D4FA0;
+  --cat-paid-lo:  #6D4FA01a;
+
   /* type */
   --display: "Fraunces", ui-serif, Georgia, serif;
   --body:    "Work Sans", ui-sans-serif, -apple-system, system-ui, sans-serif;
@@ -336,9 +345,6 @@ body.is-picking-location #map { cursor: crosshair; }
   width: 176px;
   padding: 16px 14px 14px;
   border-radius: 20px;
-  --lg-green:  #3F8F5C;
-  --lg-amber:  #C08A2E;
-  --lg-purple: #6D4FA0;
 }
 .legend__heading {
   margin: 0 2px 10px; font-size: 10.5px; font-weight: 600;
@@ -358,9 +364,9 @@ body.is-picking-location #map { cursor: crosshair; }
   display: grid; place-items: center;
 }
 .legend__badge svg { width: 15px; height: 15px; }
-.legend__row[data-kind="rent"]    .legend__badge { background: var(--lg-green); }
-.legend__row[data-kind="sharing"] .legend__badge { background: var(--lg-amber); }
-.legend__row[data-kind="paid"]    .legend__badge { background: var(--lg-purple); }
+.legend__row[data-kind="rent"]    .legend__badge { background: var(--cat-rent); }
+.legend__row[data-kind="sharing"] .legend__badge { background: var(--cat-sharing); }
+.legend__row[data-kind="paid"]    .legend__badge { background: var(--cat-paid); }
 
 .legend__label { font-size: 14px; font-weight: 500; color: var(--ink); }
 
@@ -383,29 +389,62 @@ body.is-picking-location #map { cursor: crosshair; }
 .nearby__chip[aria-pressed="true"] { background: var(--ink); color: #fff; }
 .nearby__chip[data-busy="true"] { opacity: .5; pointer-events: none; }
 
-/* ── Map markers (built in js/markers.js) ─────────────────────────── */
+/* ── Map markers (built in js/markers.js) ─────────────────────────────
+   Category badge + price, same three-colour system as the legend card
+   (data-category is set in markers.js from listing_type; aggregate
+   "price_range" chips get no single type from the server — see
+   0008_get_clusters_listing_type.sql — so they default to the rent
+   colour rather than guessing). ───────────────────────────────────── */
 .chip {
   position: absolute; transform: translate(-50%, -100%) translateY(-8px);
+  display: inline-flex; align-items: center; gap: 8px;
   font-family: var(--mono); font-size: 14px; font-weight: 700;
-  background: var(--card); color: var(--ink);
-  border: 1px solid var(--line); border-radius: 999px;
-  padding: 8px 16px; white-space: nowrap; cursor: pointer;
-  box-shadow: var(--shadow);
+  background: #fff; color: var(--ink);
+  border: 1.5px solid var(--line); border-radius: 999px;
+  padding: 5px 14px 5px 5px; white-space: nowrap; cursor: pointer;
+  box-shadow: 0 2px 6px rgb(0 0 0 / .08);
   opacity: 0; transition: opacity .18s var(--ease), transform .18s var(--ease), box-shadow .18s var(--ease);
   will-change: transform, opacity;
 }
 .chip.is-in { opacity: 1; }
-.chip:hover { box-shadow: var(--shadow-lift), 0 0 0 2px var(--terracotta-lo); z-index: 5; transform: translate(-50%, -100%) translateY(-10px); }
+.chip:hover {
+  box-shadow: 0 6px 18px rgb(0 0 0 / .14); z-index: 5;
+  transform: translate(-50%, -100%) translateY(-8px) scale(1.05);
+}
 .chip::after {                       /* the stem that pins a price to a point */
   content: ""; position: absolute; left: 50%; bottom: -5px;
-  width: 9px; height: 9px; background: var(--card);
-  border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  width: 9px; height: 9px; background: #fff;
+  border-right: 1.5px solid var(--line); border-bottom: 1.5px solid var(--line);
   transform: translateX(-50%) rotate(45deg);
 }
-.chip--sale    { color: var(--wine); }
-.chip--sharing { color: var(--teal); }
-.chip--active  { background: var(--terracotta); color: #fff; border-color: var(--terracotta); }
-.chip--active::after { background: var(--terracotta); border-color: var(--terracotta); }
+.chip__icon {
+  width: 24px; height: 24px; flex: none; border-radius: 50%;
+  display: grid; place-items: center;
+}
+.chip__icon svg { width: 13px; height: 13px; }
+.chip__tally { opacity: .55; margin-left: -2px; }
+
+.chip[data-category="rent"] {
+  border-color: var(--cat-rent-lo); color: var(--cat-rent);
+}
+.chip[data-category="rent"] .chip__icon { background: var(--cat-rent); }
+.chip[data-category="sharing"] {
+  border-color: var(--cat-sharing-lo); color: var(--cat-sharing);
+}
+.chip[data-category="sharing"] .chip__icon { background: var(--cat-sharing); }
+.chip[data-category="paid"] {
+  border-color: var(--cat-paid-lo); color: var(--cat-paid);
+}
+.chip[data-category="paid"] .chip__icon { background: var(--cat-paid); }
+
+.chip--active { color: #fff; }
+.chip--active .chip__icon { background: rgb(255 255 255 / .28); }
+.chip[data-category="rent"].chip--active    { background: var(--cat-rent); border-color: var(--cat-rent); }
+.chip[data-category="sharing"].chip--active { background: var(--cat-sharing); border-color: var(--cat-sharing); }
+.chip[data-category="paid"].chip--active    { background: var(--cat-paid); border-color: var(--cat-paid); }
+.chip[data-category="rent"].chip--active::after    { background: var(--cat-rent); border-color: var(--cat-rent); }
+.chip[data-category="sharing"].chip--active::after { background: var(--cat-sharing); border-color: var(--cat-sharing); }
+.chip[data-category="paid"].chip--active::after    { background: var(--cat-paid); border-color: var(--cat-paid); }
 
 .bubble {
   position: absolute; transform: translate(-50%, -50%);
