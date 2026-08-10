@@ -336,15 +336,26 @@
 <!-- ── Map-click chooser ──────────────────────────────────────────── -->
 <div class="scrim" id="chooser-scrim" hidden></div>
 <div class="modal chooser" id="chooser-modal" role="dialog" aria-modal="true" aria-labelledby="chooser-title" hidden>
-  <button class="modal__close" id="chooser-close" type="button" aria-label="Close">&times;</button>
-  <h2 class="modal__title" id="chooser-title">Add something here</h2>
+  <button class="chooser__close" id="chooser-close" type="button" aria-label="Close">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>
+  </button>
+
+  <header class="chooser__header">
+    <h2 class="chooser__title" id="chooser-title">Add to the map</h2>
+    <p class="chooser__subtitle">Choose what you'd like to contribute.</p>
+  </header>
 
   <div class="chooser__list">
     <button class="chooser__opt" data-action="rent_report" type="button">
       <span class="chooser__icon" data-mark="rent" aria-hidden="true"></span>
       <span class="chooser__copy">
         <strong>What rent are you paying?</strong>
-        <small>Anonymous data point — takes 10 seconds, helps everyone</small>
+        <small>Anonymous rent data · 10 seconds · helps everyone</small>
+      </span>
+      <span class="chooser__chevron" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </span>
     </button>
 
@@ -352,7 +363,10 @@
       <span class="chooser__icon" data-mark="list" aria-hidden="true"></span>
       <span class="chooser__copy">
         <strong>List my flat</strong>
-        <small>Free, direct contact, no broker</small>
+        <small>Free listing · direct contact · no broker</small>
+      </span>
+      <span class="chooser__chevron" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </span>
     </button>
 
@@ -360,7 +374,10 @@
       <span class="chooser__icon" data-mark="seek" aria-hidden="true"></span>
       <span class="chooser__copy">
         <strong>I'm looking for a flat</strong>
-        <small>Drop a pin — matches land in your inbox</small>
+        <small>Drop a pin · get matched with available flats</small>
+      </span>
+      <span class="chooser__chevron" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </span>
     </button>
 
@@ -368,7 +385,10 @@
       <span class="chooser__icon" data-mark="board" aria-hidden="true"></span>
       <span class="chooser__copy">
         <strong>Spotted a To-Let board?</strong>
-        <small>Share the phone number — it goes live on the map</small>
+        <small>Share the number · put it on the map</small>
+      </span>
+      <span class="chooser__chevron" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </span>
     </button>
   </div>

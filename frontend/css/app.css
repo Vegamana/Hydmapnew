@@ -23,8 +23,11 @@
   --indigo:       #2E4374;
   --indigo-lo:    #2E43741a;
   --ochre:        #B4841A;
+  --ochre-lo:     #B4841A1a;
   --wine:         #7A2E3A;
   --teal:         #3E7C74;
+  --teal-lo:      #3E7C741a;
+  --ivory:        #FBF7EF;   /* warmer than --card, for the premium chooser card */
 
   /* type */
   --display: "Fraunces", ui-serif, Georgia, serif;
@@ -149,32 +152,98 @@ button { cursor: pointer; }
 
 body.is-picking-location #map { cursor: crosshair; }
 
-/* ── Map-click chooser ────────────────────────────────────────────── */
-.chooser__list { display: grid; gap: 8px; margin-top: 18px; }
-.chooser__opt {
-  display: flex; align-items: center; gap: 14px; width: 100%; text-align: left;
-  border: 1px solid var(--line); background: var(--paper);
-  border-radius: var(--r-md); padding: 14px 16px;
-  transition: background .14s var(--ease), border-color .14s var(--ease);
+/* ── Map-click chooser ────────────────────────────────────────────────
+   A premium navigation menu, not four form cards: one continuous list,
+   rows separated by hairlines rather than boxed individually, so the
+   eye reads "four peers in a set" instead of "four repeated widgets".
+   `.modal.chooser` (not just `.chooser`) is deliberate: the base `.modal`
+   rule sets width/padding/box-shadow too and is defined later in this
+   file, so at equal specificity it would silently win over a plain
+   `.chooser` override regardless of what's written here. The compound
+   selector's higher specificity makes that ordering irrelevant. */
+.modal.chooser {
+  width: min(700px, calc(100vw - 32px));
+  background: var(--ivory);
+  border: 1px solid rgb(36 31 28 / .08);
+  border-radius: 22px;
+  box-shadow: 0 2px 8px rgb(36 31 28 / .04), 0 28px 64px -24px rgb(36 31 28 / .22);
+  padding: 40px 16px 20px;
 }
-.chooser__opt:hover { background: #ECE5D6; border-color: var(--terracotta); }
-.chooser__copy strong { display: block; font-size: 15px; font-family: var(--display); font-weight: 600; }
-.chooser__copy small { display: block; font-size: 12.5px; color: var(--haze); margin-top: 2px; line-height: 1.4; }
 
-/* Same abstract-shape language as the layer rail, one mark per action. */
-.chooser__icon {
-  width: 30px; height: 30px; flex: none; border-radius: 50%;
-  border: 1.5px solid currentColor; display: grid; place-items: center;
+.chooser__close {
+  position: absolute; top: 22px; right: 22px; z-index: 2;
+  width: 34px; height: 34px; border: 0; border-radius: 50%;
+  background: transparent; color: var(--haze);
+  display: grid; place-items: center;
+  transition: background .14s var(--ease), color .14s var(--ease);
 }
-.chooser__icon::after { content: ""; width: 11px; height: 11px; background: currentColor; }
-.chooser__opt[data-action="rent_report"]     .chooser__icon { color: var(--indigo); }
-.chooser__opt[data-action="rent_report"]     .chooser__icon::after { border-radius: 50%; }
-.chooser__opt[data-action="list_flat"]       .chooser__icon { color: var(--terracotta); }
-.chooser__opt[data-action="list_flat"]       .chooser__icon::after { border-radius: 3px; }
-.chooser__opt[data-action="seeker"]          .chooser__icon { color: var(--teal); }
-.chooser__opt[data-action="seeker"]          .chooser__icon::after { border-radius: 50% 50% 50% 4px; }
-.chooser__opt[data-action="board_sighting"]  .chooser__icon { color: var(--ochre); }
-.chooser__opt[data-action="board_sighting"]  .chooser__icon::after { border-radius: 4px 4px 50% 50%; }
+.chooser__close svg { width: 16px; height: 16px; }
+.chooser__close:hover { background: rgb(36 31 28 / .06); color: var(--ink); }
+
+.chooser__header { padding: 0 28px 22px; }
+.chooser__title {
+  font-family: var(--display); font-weight: 600; font-size: 30px;
+  letter-spacing: -.015em; line-height: 1.15; margin: 0 0 8px; color: var(--ink);
+}
+.chooser__subtitle { font-size: 14.5px; color: var(--ink-soft); margin: 0; }
+
+.chooser__list { display: flex; flex-direction: column; }
+.chooser__opt {
+  display: flex; align-items: center; gap: 16px; width: 100%; text-align: left;
+  border: 0; border-top: 1px solid rgb(36 31 28 / .08); background: none;
+  padding: 18px 28px; border-radius: 12px;
+  transition: background .16s var(--ease), transform .16s var(--ease);
+}
+.chooser__list .chooser__opt:first-child { border-top: 0; }
+.chooser__opt:hover, .chooser__opt:focus-visible {
+  background: rgb(36 31 28 / .035); transform: translateY(-1px);
+}
+.chooser__opt:active { transform: translateY(0); }
+
+.chooser__copy { flex: 1; min-width: 0; }
+.chooser__copy strong {
+  display: block; font-size: 16.5px; font-family: var(--display); font-weight: 600;
+  color: var(--ink); letter-spacing: -.005em;
+}
+.chooser__copy small {
+  display: block; font-size: 13px; color: var(--ink-soft); margin-top: 3px;
+  line-height: 1.5; font-weight: 400;
+}
+
+/* Soft tinted disc behind a solid dot — restrained, one colour cue per row. */
+.chooser__icon {
+  width: 38px; height: 38px; flex: none; border-radius: 50%;
+  border: 1.5px solid currentColor; display: grid; place-items: center;
+  transition: transform .16s var(--ease);
+}
+.chooser__icon::after { content: ""; width: 10px; height: 10px; background: currentColor; border-radius: 50%; }
+.chooser__opt:hover .chooser__icon { transform: scale(1.08); }
+
+.chooser__opt[data-action="rent_report"]    .chooser__icon { color: var(--indigo); background: var(--indigo-lo); }
+.chooser__opt[data-action="list_flat"]      .chooser__icon { color: var(--terracotta); background: var(--terracotta-lo); }
+.chooser__opt[data-action="seeker"]         .chooser__icon { color: var(--teal); background: var(--teal-lo); }
+.chooser__opt[data-action="board_sighting"] .chooser__icon { color: var(--ochre); background: var(--ochre-lo); }
+
+.chooser__chevron {
+  flex: none; width: 18px; height: 18px; color: var(--haze);
+  opacity: 0; transform: translateX(-3px);
+  transition: opacity .16s var(--ease), transform .16s var(--ease);
+}
+.chooser__chevron svg { width: 100%; height: 100%; }
+.chooser__opt:hover .chooser__chevron, .chooser__opt:focus-visible .chooser__chevron {
+  opacity: 1; transform: translateX(0);
+}
+
+@media (max-width: 720px) {
+  .modal.chooser {
+    position: fixed; left: 0; right: 0; bottom: 0; top: auto;
+    transform: none; width: auto; max-height: 84vh; overflow-y: auto;
+    border-radius: 24px 24px 0 0; padding: 32px 0 max(16px, env(safe-area-inset-bottom, 0px));
+    animation: rise .22s var(--ease);
+  }
+  .chooser__header, .chooser__opt { padding-left: 20px; padding-right: 20px; }
+  .chooser__title { font-size: 26px; }
+}
 
 /* ── Board sighting markers ───────────────────────────────────────── */
 .sighting {
