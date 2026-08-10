@@ -75,6 +75,18 @@
     </span>
     <span>Satellite</span>
   </button>
+  <!-- Not a data-layer toggle — no aria-pressed, own click handler in
+       geolocate.js. controls.js's rail click handler only acts on
+       [data-layer] elements, so it safely ignores this one. -->
+  <button class="rail__btn" id="locate-btn" type="button" aria-label="Show my location">
+    <span class="rail__mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/>
+        <path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+      </svg>
+    </span>
+    <span>Locate</span>
+  </button>
 </nav>
 
 <!-- ── Rent pulse: the signature readout ──────────────────────────── -->

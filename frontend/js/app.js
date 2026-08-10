@@ -14,6 +14,7 @@ import { initListing, openListing, closeListing } from "./listing.js";
 import { initModal } from "./modal.js";
 import { initListingForm } from "./listingForm.js";
 import { initMapActions } from "./mapActions.js";
+import { initGeolocate } from "./geolocate.js";
 import { toast } from "./toast.js";
 import { count } from "./format.js";
 
@@ -37,6 +38,7 @@ async function main() {
   initModal();
   initListingForm();
   initMapActions();
+  initGeolocate();
   initListing({
     onClose: () => {
       setActiveListing(null);
