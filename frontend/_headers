@@ -34,3 +34,14 @@
 # conditional-GET cost is trivial next to guaranteed staleness.
 /data/*
   Cache-Control: public, max-age=0, must-revalidate
+
+# Same fixed-filename-forever reasoning as above, applied up front this
+# time instead of after getting bitten by it again.
+/favicon.png
+  Cache-Control: public, max-age=0, must-revalidate
+
+/favicon.ico
+  Cache-Control: public, max-age=0, must-revalidate
+
+/apple-touch-icon.png
+  Cache-Control: public, max-age=0, must-revalidate
