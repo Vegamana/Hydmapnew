@@ -92,6 +92,24 @@ async function main() {
     }
   }
 
+  // The result of a one-click email action (confirm / rented / available) —
+  // listing_action redirects here with the outcome in the query string
+  // rather than serving its own HTML page, because Supabase's hosted edge
+  // gateway overrides an edge function's Content-Type on HTML responses and
+  // the browser ends up showing raw markup as text instead of rendering it.
+  const actionParams = new URLSearchParams(location.search);
+  const actionResult = actionParams.get("action_result");
+  if (actionResult) {
+    const title = actionParams.get("action_title") || "";
+    const message = actionParams.get("action_message") || "";
+    toast([title, message].filter(Boolean).join(" — "), actionResult === "ok" ? "ok" : "bad");
+    actionParams.delete("action_result");
+    actionParams.delete("action_title");
+    actionParams.delete("action_message");
+    const rest = actionParams.toString();
+    history.replaceState(null, "", location.pathname + (rest ? `?${rest}` : ""));
+  }
+
   // Browser back should close the sheet rather than leave the page.
   window.addEventListener("popstate", () => {
     if (!new URLSearchParams(location.search).get("listing")) closeListing();
