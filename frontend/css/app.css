@@ -141,6 +141,19 @@ button { cursor: pointer; }
 }
 .list-btn:hover { background: #963B26; }
 
+/* ── Feedback ─────────────────────────────────────────────────────── */
+/* Quiet, not a CTA — sits below the Metro/Satellite/Locate row, mirroring
+   List my flat's spot below search on the opposite side. */
+.feedback-btn {
+  position: fixed; z-index: 10; top: 82px; right: 16px;
+  display: inline-block;
+  background: var(--card); border: 1px solid var(--line); color: var(--ink-soft);
+  border-radius: var(--r-md); padding: 10px 16px; font-size: 13.5px; font-weight: 600;
+  text-decoration: none; box-shadow: var(--shadow);
+  transition: background .14s var(--ease), color .14s var(--ease), box-shadow .14s var(--ease);
+}
+.feedback-btn:hover { background: var(--paper); color: var(--ink); box-shadow: var(--shadow-lift); }
+
 /* ── Location picker (inside the list-a-flat modal) ─────────────────── */
 .pin-picker {
   display: flex; align-items: center; gap: 12px; width: 100%;
@@ -658,6 +671,10 @@ body.is-picking-location #map { cursor: crosshair; }
   .rail { top: 74px; right: 10px; bottom: auto; left: auto; gap: 8px; }
   .rail__btn { width: 52px; height: 52px; font-size: 9.5px; }
   .rail__mark { width: 19px; height: 19px; }
+
+  /* A third row: list-btn + rail already share row two (top:74px) on a
+     full-width mobile search bar, no room left there for a third item. */
+  .feedback-btn { top: 134px; right: 10px; padding: 9px 14px; font-size: 13px; }
 
   .pulse { left: 10px; right: 10px; width: auto; bottom: calc(env(safe-area-inset-bottom, 0px) + 68px); }
   .pulse__value { font-size: 28px; }

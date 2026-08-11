@@ -17,8 +17,11 @@ import { initMapActions } from "./mapActions.js";
 import { initGeolocate } from "./geolocate.js";
 import { toast } from "./toast.js";
 import { count } from "./format.js";
+import { GOOGLE_FEEDBACK_FORM_URL } from "./config.js";
 
 async function main() {
+  document.getElementById("feedback-link").href = GOOGLE_FEEDBACK_FORM_URL;
+
   const container = document.getElementById("map");
 
   try {

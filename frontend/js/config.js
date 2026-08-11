@@ -37,3 +37,9 @@ export const DEFAULTS = {
   mapIdleDebounceMs: 220,
   aqiDebounceMs: 900,
 };
+
+// Doesn't vary by environment (unlike CONFIG above), so it's a plain
+// constant rather than something build-config.sh stamps in per-deploy.
+// Single place to change it if the form ever moves.
+export const GOOGLE_FEEDBACK_FORM_URL =
+  "https://docs.google.com/forms/d/e/1FAIpQLScDlPLp1X1ha_QAp6IWx61XDEtuiSKh0rco4YkzBZq08BpeJw/viewform?usp=header";
